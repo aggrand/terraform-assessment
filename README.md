@@ -1,4 +1,4 @@
-# Terraform Assessment Modules
+# Terraform Assessment
 submitted by Raiden Worley
 
 ## Setting up Pre-commit Hooks
