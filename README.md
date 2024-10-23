@@ -1,12 +1,14 @@
 # Terraform Assessment
 submitted by Raiden Worley
 
-## Setting up Pre-commit Hooks
+## Testing
 This repo uses pre-commit. It is recommended to install pre-commit using your package manager of choice then run the following from the repo root:
 
 ``` shell
 pre-commit install
 ```
+
+These do the most basic checks. For more thorough testing (or for those who don't like pre-commits), you can run `make`.
 
 ## Code Layout
 There are two main subdirectories in this project: `modules` and `live`. The former contains building blocks. The latter contains the configuration for environments. In a real project I would want these in separate repos so that we can use semantic versioning on the modules for better stability and reusability. For simplicity and convenience in this project I kept them together in this repo.
