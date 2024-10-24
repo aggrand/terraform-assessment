@@ -17,21 +17,10 @@ locals {
   all_ips      = "0.0.0.0/0"
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-}
-
 resource "aws_lb" "main_lb" {
   name               = var.alb_name
   load_balancer_type = "application"
-  subnets            = data.aws_subnets.default.ids
+  subnets            = var.subnet_ids
   security_groups    = [aws_security_group.alb.id]
 }
 

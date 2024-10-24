@@ -14,6 +14,8 @@ provider "aws" {
 }
 
 module "alb" {
-  source   = "../../modules/networking/alb"
-  alb_name = "example-test-alb"
+  source = "../../modules/networking/alb"
+
+  alb_name   = "example-test-alb"
+  subnet_ids = data.aws_subnets.default.ids
 }
