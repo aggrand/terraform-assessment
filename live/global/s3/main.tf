@@ -8,13 +8,13 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket         = "terraform-assessment-aggrand"
-    region         = "us-east-1"
-    dynamodb_table = "terraform-assessment-locks"
-    key            = "global/s3/terraform.tfstate"
-    encrypt        = true
-  }
+  #backend "s3" {
+  #  bucket         = "terraform-assessment-aggrand"
+  #  region         = "us-east-1"
+  #  dynamodb_table = "terraform-assessment-locks"
+  #  key            = "global/s3/terraform.tfstate"
+  #  encrypt        = true
+  #}
 }
 
 provider "aws" {
@@ -31,9 +31,9 @@ resource "aws_s3_bucket" "terraform_state" {
   provider = aws.primary_region
   bucket   = "terraform-assessment-aggrand"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  #lifecycle {
+  #  prevent_destroy = true
+  #}
 }
 
 resource "aws_s3_bucket_versioning" "enabled" {
