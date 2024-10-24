@@ -24,7 +24,7 @@ resource "aws_lb" "module_lb" {
   security_groups            = [aws_security_group.alb.id]
   drop_invalid_header_fields = true
 
-  #checkov:skip=CKV_AWS_150:Setting up deletion protection (via argument?) is future work
+  #checkov:skip=CKV_AWS_150:Setting up optional deletion protection (via argument?) is future work
   #checkov:skip=CKV_AWS_91:Setting up logging is future work
   #checkov:skip=CKV2_AWS_20:Setting up HTTPS certs is future work
   #checkov:skip=CKV2_AWS_31::Setting up kinesis and logging is future work
