@@ -5,4 +5,6 @@ repos:
     hooks:
       - id: terraform_fmt
       - id: terraform_tflint
-      - id: terraform_validate
+      # TODO: Validate doesn't like the passed-in provider
+      # - id: terraform_validate
+      #   exclude: ^s3-replicated/

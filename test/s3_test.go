@@ -4,8 +4,8 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 
-	"testing"
 	"strings"
+	"testing"
 )
 
 // TODO: Test uploading and downloading a blob, test that versions exist.
