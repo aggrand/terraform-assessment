@@ -17,7 +17,7 @@ locals {
   all_ips      = "0.0.0.0/0"
 }
 
-resource "aws_lb" "main_lb" {
+resource "aws_lb" "module_lb" {
   name               = var.alb_name
   load_balancer_type = "application"
   subnets            = var.subnet_ids
@@ -25,7 +25,7 @@ resource "aws_lb" "main_lb" {
 }
 
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.main_lb.arn
+  load_balancer_arn = aws_lb.module_lb.arn
   port              = local.http_port
   protocol          = "HTTP"
 
