@@ -40,6 +40,8 @@ There are two main subdirectories in this project: `modules` and `live`. The for
 ### modules/networking/alb
 This module defines the load balancer. This wasn't an explicit requirement in the email, but since I wanted to allow autoscaling of the EC2 instances, this seemed like a practical requirement so that there's a single point of connection. I used the application load balancer specifically because I assumed we'd be handling HTTP traffic. If there's higher load, or more throughput requirements, then the network load balancer could be used instead.
 
+The alb is definitely not production-ready. More analysis is needed of the WAF settings, possibly extracting them into a separate module. It also needs to configure logging, HTTPS, and options to disallow public access (preventing 0.0.0.0/0).
+
 ### modules/storage/s3
 This module defines the s3 bucket used for storing terraform state. Creates a bucket with encryption, versioning, and blocked public access. Ideally it could be extended as a general s3 module. Future work can add options to enable SNS, KMS, logging, and configurations for access permissions.
 

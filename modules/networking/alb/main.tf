@@ -18,10 +18,16 @@ locals {
 }
 
 resource "aws_lb" "module_lb" {
-  name               = var.alb_name
-  load_balancer_type = "application"
-  subnets            = var.subnet_ids
-  security_groups    = [aws_security_group.alb.id]
+  name                       = var.alb_name
+  load_balancer_type         = "application"
+  subnets                    = var.subnet_ids
+  security_groups            = [aws_security_group.alb.id]
+  drop_invalid_header_fields = true
+
+  #checkov:skip=CKV_AWS_150:Setting up deletion protection (via argument?) is future work
+  #checkov:skip=CKV_AWS_91:Setting up logging is future work
+  #checkov:skip=CKV2_AWS_20:Setting up HTTPS certs is future work
+  #checkov:skip=CKV2_AWS_31::Setting up kinesis and logging is future work
 }
 
 resource "aws_lb_listener" "http" {
@@ -39,23 +45,31 @@ resource "aws_lb_listener" "http" {
       status_code  = 404
     }
   }
+
+  #checkov:skip=CKV_AWS_2:Setting up HTTPS certs is future work
+  #checkov:skip=CKV_AWS_103:Setting up HTTPS certs is future work
 }
 
 resource "aws_security_group" "alb" {
-  name = var.alb_name
+  name        = var.alb_name
+  description = "Allow http from anywhere and allow all egress"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_http" {
+  description       = "Allow http from anywhere"
   security_group_id = aws_security_group.alb.id
 
   cidr_ipv4   = local.all_ips
   ip_protocol = local.tcp_protocol
   from_port   = local.http_port
   to_port     = local.http_port
+
+  #checkov:skip=CKV_AWS_260:This ALB is public-facing. Future work could hide it behind a CDN or similar.
 }
 
 # TODO: Make conditional on variable
 resource "aws_vpc_security_group_egress_rule" "allow_all" {
+  description       = "Allow all egress"
   security_group_id = aws_security_group.alb.id
 
   cidr_ipv4   = local.all_ips
@@ -65,7 +79,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
 }
 
 # Mostly taken from here: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl
-# This needs more examination in detail.
+# This needs more examination in detail. I only kinda understand it. This sort of thing benefits from heavy code review.
 # TODO Should this be a separate module?
 resource "aws_wafv2_web_acl" "common_rules" {
   name        = "example-web-acl"
@@ -100,6 +114,26 @@ resource "aws_wafv2_web_acl" "common_rules" {
       sampled_requests_enabled   = true
     }
   }
+
+  rule {
+    name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+    priority = 2
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+    override_action {
+      none {}
+    }
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "bad-input-rule-set"
+      sampled_requests_enabled   = true
+    }
+  }
+  #checkov:skip=CKV2_AWS_31:Setting up kinesis logging is future work
 }
 
 resource "aws_wafv2_web_acl_association" "common_rules" {
