@@ -19,10 +19,17 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
+  alias  = "primary_region"
+}
+
+provider "aws" {
+  region = "us-west-1"
+  alias  = "recovery_region"
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "terraform-assessment-aggrand"
+  provider = aws.primary_region
+  bucket   = "terraform-assessment-aggrand"
 
   lifecycle {
     prevent_destroy = true
@@ -30,14 +37,16 @@ resource "aws_s3_bucket" "terraform_state" {
 }
 
 resource "aws_s3_bucket_versioning" "enabled" {
-  bucket = aws_s3_bucket.terraform_state.id
+  provider = aws.primary_region
+  bucket   = aws_s3_bucket.terraform_state.id
   versioning_configuration {
     status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
-  bucket = aws_s3_bucket.terraform_state.id
+  provider = aws.primary_region
+  bucket   = aws_s3_bucket.terraform_state.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -47,7 +56,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
 }
 
 resource "aws_s3_bucket_public_access_block" "public_access" {
-  bucket = aws_s3_bucket.terraform_state.id
+  provider = aws.primary_region
+  bucket   = aws_s3_bucket.terraform_state.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -56,6 +66,7 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
 }
 
 resource "aws_dynamodb_table" "terraform_locks" {
+  provider     = aws.primary_region
   name         = "terraform-assessment-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
@@ -64,4 +75,6 @@ resource "aws_dynamodb_table" "terraform_locks" {
     name = "LockID"
     type = "S"
   }
+  #checkov:skip=CKV_AWS_28:Terraform locks are transient and a new valid state can be created with force-unlock
+  #checkov:skip=CKV_AWS_119:Terraform locks are not secret (or at least in this project)
 }

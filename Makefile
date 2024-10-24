@@ -1,7 +1,6 @@
 .DEFAULT_GOAL := help
 
-# TODO: Add back in checkov. It's disabled for now.
-TERRAFORM_CHECKS := terraform-check-fmt terraform-tflint terraform-validate
+TERRAFORM_CHECKS := terraform-check-fmt terraform-tflint terraform-validate # terraform-checkov
 TERRAFORM_FIXES := terraform-fix-fmt terraform-tflint-fix
 GO_CHECKS := go-check-fmt go-mod-tidy-check go-lint-check
 GO_FIXES := go-fix-fmt go-mod-tidy-fix go-lint-fix
