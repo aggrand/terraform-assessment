@@ -63,3 +63,46 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
   from_port   = local.any_port
   to_port     = local.any_port
 }
+
+# Mostly taken from here: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl
+# This needs more examination in detail.
+# TODO Should this be a separate module?
+resource "aws_wafv2_web_acl" "common_rules" {
+  name        = "example-web-acl"
+  scope       = "REGIONAL" # Cambiar a "CLOUDFRONT" si es necesario
+  description = "WAFv2 Web ACL with AWSManagedRulesCommonRuleSet"
+
+  default_action {
+    allow {}
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "general-metric"
+    sampled_requests_enabled   = true
+  }
+
+  rule {
+    name     = "AWS-Common-RuleSet"
+    priority = 1
+    statement {
+      managed_rule_group_statement {
+        vendor_name = "AWS"
+        name        = "AWSManagedRulesCommonRuleSet"
+      }
+    }
+    override_action {
+      none {}
+    }
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "common-rule-set"
+      sampled_requests_enabled   = true
+    }
+  }
+}
+
+resource "aws_wafv2_web_acl_association" "common_rules" {
+  resource_arn = aws_lb.module_lb.arn
+  web_acl_arn  = aws_wafv2_web_acl.common_rules.arn
+}
