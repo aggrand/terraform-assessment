@@ -21,17 +21,23 @@ resource "aws_launch_template" "module_template" {
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.instance.id]
 
+  metadata_options {
+    http_endpoint = "disabled"
+  }
+
   lifecycle {
     create_before_destroy = true
   }
 }
 
 resource "aws_security_group" "instance" {
-  name = "${var.cluster_name}-instance"
+  description = "Allow http access from anywhere"
+  name        = "${var.cluster_name}-instance"
 }
 
 # TODO: Only allow access from lb
 resource "aws_vpc_security_group_ingress_rule" "allow_http" {
+  description       = "Allow http access from anywhere"
   security_group_id = aws_security_group.instance.id
 
   cidr_ipv4   = local.all_ips
