@@ -41,10 +41,10 @@ There are two main subdirectories in this project: `modules` and `live`. The for
 This module defines the load balancer. This wasn't an explicit requirement in the email, but since I wanted to allow autoscaling of the EC2 instances, this seemed like a practical requirement so that there's a single point of connection. I used the application load balancer specifically because I assumed we'd be handling HTTP traffic. If there's higher load, or more throughput requirements, then the network load balancer could be used instead.
 
 ### modules/storage/s3
-This module defines the s3 bucket used for storing terraform state.
+This module defines the s3 bucket used for storing terraform state. Creates a bucket with encryption, versioning, and blocked public access. Future work can enable SNS when KMS is supported. (KMS would be more of a rabbit hole to set up all the permissions.)
 
 ### modules/storage/s3-replicated
-This module extends the S3 module above, allowing for replication between two different buckets. While a region-wide outage is rare, it does [happen](https://aws.amazon.com/message/41926/). Since these buckets manage the state for all the infrastructure, that seems sufficiently catastrophic to take this precaution.
+This module extends the S3 module above, allowing for replication between two different buckets. While a region-wide outage is rare, it does [happen](https://aws.amazon.com/message/41926/). Since these buckets manage the state for all the infrastructure, that seems sufficiently catastrophic to take this precaution. This module was intended to be an all-in-one s3 bucket with a backup. However, due to the fact that only one replication configuration is allowed per bucket, in the future it may need to be extended to allow a list of buckets to be created outside the module and passed in. This would be more complicatd since permissions and destination rules need to be created for each bucket.
 
 
 ## More Notes

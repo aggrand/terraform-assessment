@@ -17,4 +17,7 @@ module "s3" {
   source = "../../modules/storage/s3"
 
   bucket_name = var.bucket_name
+
+  enable_logging = false
+  logging_bucket = ""
 }
