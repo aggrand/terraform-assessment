@@ -40,6 +40,13 @@ There are two main subdirectories in this project: `modules` and `live`. The for
 ### modules/networking/alb
 This module defines the load balancer. This wasn't an explicit requirement in the email, but since I wanted to allow autoscaling of the EC2 instances, this seemed like a practical requirement so that there's a single point of connection. I used the application load balancer specifically because I assumed we'd be handling HTTP traffic. If there's higher load, or more throughput requirements, then the network load balancer could be used instead.
 
+### modules/storage/s3
+This module defines the s3 bucket used for storing terraform state.
+
+### modules/storage/s3-replicated
+This module extends the S3 module above, allowing for replication between two different buckets. While a region-wide outage is rare, it does [happen](https://aws.amazon.com/message/41926/). Since these buckets manage the state for all the infrastructure, that seems sufficiently catastrophic to take this precaution.
+
+
 ## More Notes
 I assumed for the moment that we'll only deploy to one region. The `live` configurations could be expanded to more regions, and a real app would probably want to do this, but the exact nature of that expansion would depend heavily on the app and how it functions, whether we'd want an "active-active" approach, how we'd deal with latency between regions, etc. In such a case we'd probably create separate modules under `live` for each region.
 
