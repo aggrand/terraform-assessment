@@ -10,48 +10,28 @@ terraform {
 }
 
 locals {
-  server_port  = 8080
   tcp_protocol = "tcp"
-  all_ips      = "0.0.0.0/0"
+  all_ips      = ["0.0.0.0/0"]
+  server_port  = 8080
 }
 
-resource "aws_launch_template" "module_template" {
-  name                   = "${var.cluster_name}-template"
+resource "aws_launch_template" "example" {
   image_id               = var.instance_ami
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.instance.id]
+
+  user_data              = var.user_data
   update_default_version = true
 
-  user_data = var.user_data
-
-  metadata_options {
-    http_endpoint = "disabled"
-  }
-
+  # Required when using a launch template with an auto scaling group.
   lifecycle {
     create_before_destroy = true
   }
 }
 
-resource "aws_security_group" "instance" {
-  description = "Allow http access from anywhere"
-  name        = "${var.cluster_name}-instance"
-}
-
-# TODO: Only allow access from lb
-resource "aws_vpc_security_group_ingress_rule" "allow_http" {
-  description       = "Allow http access from anywhere"
-  security_group_id = aws_security_group.instance.id
-
-  cidr_ipv4   = local.all_ips
-  ip_protocol = local.tcp_protocol
-  from_port   = local.server_port
-  to_port     = local.server_port
-}
-
-resource "aws_autoscaling_group" "module_asg" {
+resource "aws_autoscaling_group" "example" {
   launch_template {
-    id = aws_launch_template.module_template.id
+    id = aws_launch_template.example.id
   }
   vpc_zone_identifier = var.subnet_ids
 
@@ -68,9 +48,24 @@ resource "aws_autoscaling_group" "module_asg" {
     }
   }
 
+
   tag {
     key                 = "Name"
     value               = "${var.cluster_name}-asg"
     propagate_at_launch = true
   }
+}
+
+resource "aws_security_group" "instance" {
+  name = "${var.cluster_name}-instance"
+}
+
+resource "aws_security_group_rule" "allow_server_http_inbound" {
+  type              = "ingress"
+  security_group_id = aws_security_group.instance.id
+
+  from_port   = local.server_port
+  to_port     = local.server_port
+  protocol    = local.tcp_protocol
+  cidr_blocks = local.all_ips
 }
