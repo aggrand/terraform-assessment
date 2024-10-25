@@ -40,3 +40,8 @@ variable "max_size" {
   type        = string
   default     = 5
 }
+
+variable "lb_sg_id" {
+  description = "The security group id of load balancer that routes traffic to the instance"
+  type        = string
+}

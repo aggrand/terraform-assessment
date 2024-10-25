@@ -71,15 +71,16 @@ resource "aws_security_group" "instance" {
 
 resource "aws_security_group_rule" "allow_server_http_inbound" {
   type              = "ingress"
-  description       = "Allow http inbound"
+  description       = "Allow http inbound from the load balancer"
   security_group_id = aws_security_group.instance.id
 
-  from_port   = local.server_port
-  to_port     = local.server_port
-  protocol    = local.tcp_protocol
-  cidr_blocks = local.all_ips
+  from_port                = local.server_port
+  to_port                  = local.server_port
+  protocol                 = local.tcp_protocol
+  source_security_group_id = var.lb_sg_id
 }
 
+# This is just for testing
 resource "aws_security_group_rule" "allow_ssh_inbound" {
   type              = "ingress"
   description       = "Allow ssh inbound"
