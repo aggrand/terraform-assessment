@@ -13,9 +13,20 @@ variable "instance_type" {
   type        = string
 }
 
+variable "user_data" {
+  description = "The userdata for instances"
+  type        = string
+  default     = ""
+}
+
 variable "subnet_ids" {
   description = "The IDs of the subnets to place the asg into"
   type        = list(string)
+}
+
+variable "target_group_arn" {
+  description = "The ARN of the target group"
+  type        = string
 }
 
 variable "min_size" {

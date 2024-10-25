@@ -11,7 +11,6 @@ terraform {
 
 locals {
   http_port    = 80
-  any_port     = 0
   any_protocol = "-1"
   tcp_protocol = "tcp"
   all_ips      = "0.0.0.0/0"
@@ -74,8 +73,6 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
 
   cidr_ipv4   = local.all_ips
   ip_protocol = local.any_protocol
-  from_port   = local.any_port
-  to_port     = local.any_port
 }
 
 # Mostly taken from here: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl
@@ -83,7 +80,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
 # TODO Should this be a separate module?
 resource "aws_wafv2_web_acl" "common_rules" {
   name        = "example-web-acl"
-  scope       = "REGIONAL" # Cambiar a "CLOUDFRONT" si es necesario
+  scope       = "REGIONAL"
   description = "WAFv2 Web ACL with AWSManagedRulesCommonRuleSet"
 
   default_action {

@@ -20,6 +20,9 @@ resource "aws_launch_template" "module_template" {
   image_id               = var.instance_ami
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.instance.id]
+  update_default_version = true
+
+  user_data = var.user_data
 
   metadata_options {
     http_endpoint = "disabled"
@@ -52,12 +55,18 @@ resource "aws_autoscaling_group" "module_asg" {
   }
   vpc_zone_identifier = var.subnet_ids
 
-  # TODO: Add target group arns
-  #target_group_arns = [aws_lb_target_group.asg.arn]
+  target_group_arns = [var.target_group_arn]
   health_check_type = "ELB"
 
   min_size = var.min_size
   max_size = var.max_size
+
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 50
+    }
+  }
 
   tag {
     key                 = "Name"
