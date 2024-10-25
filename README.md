@@ -64,14 +64,27 @@ This uses RDS to create a database intended for use in an application. It accept
 This module creates an autoscaling group for EC2 instances. It accepts various variables related to the min and max instance count, the AMI to use, a userdata script to run, and subnet_ids and target group ARNs that can be used to attach the module to others (like the load balancer). I think the instance refresh is still not working perfectly and health checks should be added; future work would tackle those.
 
 ### modules/services/web-app
-This module represents a web app, connecting together the mysql, asg, and alb modules. It accepts variables like min/max instance count, db username and password, and the instance AMI to use. Ideally the instance AMI would represent the totality of the application, allowing us to treat it as immutable infrastructure. In practice for this assessment I used a userdata script.
+This module represents a web app, connecting together the mysql, asg, and alb modules. It accepts variables like min/max instance count, db username and password, and the instance AMI to use. Ideally the instance AMI would represent the totality of the application, allowing us to treat it as immutable infrastructure. In practice for this assessment I used a userdata script. The script confirms that it can reach the database, then creates a static page reporting its status.
+
+### live/global/s3
+This directory has the configuration for the s3 store for terraform state.
+
+### live/stage/services/web-app
+This directory has the staging environment configuration for the web app.
+
+### live/prod/services/web-app
+This directory has the production environment configuration for the web app.
+
+### examples
+This directory has examples of several of the modules in use. This serves both as an example of their uses, but also as a test harness for the golang tests.
 
 ### testing
-This module has the golang tests. These tests are very simple; mostly just spinning up then destroying the resources. There's room for improvement and testing behaviors like replications, detailed responses, etc.
+This directory has the golang tests. These tests are very simple; mostly just spinning up then destroying the resources, though the ALB test makes a request. There's room for improvement and testing behaviors like replication, detailed responses, etc.
+
 
 ## More Notes
 I assumed for the moment that we'll only deploy to one region. The `live` configurations could be expanded to more regions, and a real app would probably want to do this, but the exact nature of that expansion would depend heavily on the app and how it functions, whether we'd want an "active-active" approach, how we'd deal with latency between regions, etc. In such a case we'd probably create separate modules under `live` for each region.
 
-One of the biggest flaws with the current setup is security and networking. Unfortunately I started running out of time for configuring the networking. Ideally we'd make a "vpc" module that would create a vpc in a region, as well as a set of public and private subnets in each AZ. Then we can hide most of our resources above into the private subnets, with security groups allowing access from only designated sources providing further protection. For the moment, most things are configured for public access, and that's extremely insecure in a production environment.
+One of the biggest flaws with the current setup is security and networking. Unfortunately I started running out of time for configuring the networking. Ideally we'd make a "vpc" module that would create a vpc in a region, as well as a set of public and private subnets in each AZ. Then we can hide most of our resources above into the private subnets. 
 
 Beyond that, I think developing each of the modules from the ground up, with a steady code-review process and thorough testing would make me a lot more confident in the infrastructure. We'd also want to make an effort to present a clean interface for each module, with an expectation that external users don't know the details. In this example they kind of grew organically.

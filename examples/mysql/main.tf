@@ -22,4 +22,6 @@ module "db" {
 
   db_username = var.db_username
   db_password = var.db_password
+
+  ec2_sg_id = ""
 }

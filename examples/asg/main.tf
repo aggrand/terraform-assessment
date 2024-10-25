@@ -26,4 +26,8 @@ module "asg" {
 
   min_size = 1
   max_size = 1
+
+  lb_sg_id         = ""
+  db_sg_id         = ""
+  target_group_arn = ""
 }

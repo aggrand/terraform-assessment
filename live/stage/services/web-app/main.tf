@@ -7,6 +7,14 @@ terraform {
       version = "5.72.1"
     }
   }
+
+  backend "s3" {
+    bucket         = "aggrand-assessment-terraform-state"
+    region         = "us-east-1"
+    dynamodb_table = "aggrand-assessment-terraform-state"
+    key            = "stage/services/web-app"
+    encrypt        = true
+  }
 }
 
 provider "aws" {

@@ -7,6 +7,14 @@ terraform {
       version = "5.72.1"
     }
   }
+
+  backend "s3" {
+    bucket         = "aggrand-assessment-terraform-state"
+    region         = "us-east-1"
+    dynamodb_table = "aggrand-assessment-terraform-state"
+    key            = "prod/services/web-app"
+    encrypt        = true
+  }
 }
 
 provider "aws" {
@@ -23,7 +31,7 @@ module "web-app" {
   instance_type = "t2.micro"
 
   min_size = 2
-  max_size = 5
+  max_size = 10
 
   db_username = var.db_username
   db_password = var.db_password
