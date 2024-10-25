@@ -11,6 +11,8 @@ terraform {
 
 locals {
   tcp_protocol = "tcp"
+  any_port     = 0
+  any_protocol = "-1"
   all_ips      = ["0.0.0.0/0"]
   server_port  = 8080
 }
@@ -23,6 +25,8 @@ resource "aws_launch_template" "module_template" {
 
   user_data              = var.user_data
   update_default_version = true
+
+  key_name = "main-key-pair"
 
   # Required when using a launch template with an auto scaling group.
   lifecycle {
@@ -73,5 +77,27 @@ resource "aws_security_group_rule" "allow_server_http_inbound" {
   from_port   = local.server_port
   to_port     = local.server_port
   protocol    = local.tcp_protocol
+  cidr_blocks = local.all_ips
+}
+
+resource "aws_security_group_rule" "allow_ssh_inbound" {
+  type              = "ingress"
+  description       = "Allow ssh inbound"
+  security_group_id = aws_security_group.instance.id
+
+  from_port   = 22
+  to_port     = 22
+  protocol    = local.tcp_protocol
+  cidr_blocks = local.all_ips
+}
+
+# TODO: Restrict to just the db
+resource "aws_security_group_rule" "allow_all_outbound" {
+  type              = "egress"
+  security_group_id = aws_security_group.instance.id
+
+  from_port   = local.any_port
+  to_port     = local.any_port
+  protocol    = local.any_protocol
   cidr_blocks = local.all_ips
 }

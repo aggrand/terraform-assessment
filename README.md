@@ -52,11 +52,21 @@ This module defines the s3 bucket used for storing terraform state. Creates a bu
 ### modules/storage/s3-replicated
 This module extends the S3 module above, allowing for replication between two different buckets. While a region-wide outage is rare, it does [happen](https://aws.amazon.com/message/41926/). Since these buckets manage the state for all the infrastructure, that seems sufficiently catastrophic to take this precaution. This module was intended to be an all-in-one s3 bucket with a backup. However, due to the fact that only one replication configuration is allowed per bucket, in the future it may need to be extended to allow a list of buckets to be created outside the module and passed in. This would be more complicatd since permissions and destination rules need to be created for each bucket.
 
+The s3 bucket and dynamo tables weren't explicit requirements of the email, but I think having a stable state store would be pretty vital for an application.
+
 ### modules/storage/dynamo
 This creates a DynamoDB table for terraform state locking. It is very purpose-built for that, only accepting a variable for setting the table's name. Future work could extend it to a general DynamoDB module.
+
+### modules/compute/asg
+This module creates an autoscaling group for EC2 instances. It accepts various variables related to the min and max instance count, the AMI to use, a userdata script to run, and subnet_ids and target group ARNs that can be used to attach the module to others (like the load balancer). I think the instance refresh is still not working perfectly and health checks should be added; future work would tackle those.
+
+### modules/services/web-app
+This module represents a web app, connecting together the mysql, asg, and alb modules. It accepts variables like min/max instance count, db username and password, and the instance AMI to use. Ideally the instance AMI would represent the totality of the application, allowing us to treat it as immutable infrastructure. In practice for this assessment I used a userdata script.
+
+### testing
+This module has the golang tests. These tests are very simple; mostly just spinning up then destroying the resources. There's room for improvement and testing behaviors like replications, detailed responses, etc.
 
 ## More Notes
 I assumed for the moment that we'll only deploy to one region. The `live` configurations could be expanded to more regions, and a real app would probably want to do this, but the exact nature of that expansion would depend heavily on the app and how it functions, whether we'd want an "active-active" approach, how we'd deal with latency between regions, etc. In such a case we'd probably create separate modules under `live` for each region.
 
-## Future Work
-I'd want to make the Makefile smarter. I prefer to be able to control the entire repo from the root directory, so something to help find and deploy the live modules. Right now it's necessary to enter each directory and run the terraform commands.
+One of the biggest flaws with the current setup is security and networking. Unfortunately I started running out of time for configuring the networking. Ideally we'd make a "vpc" module that would create a vpc in a region, as well as a set of public and private subnets in each AZ. Then we can hide most of our resources above into the private subnets, with security groups allowing access from only designated sources providing further protection. For the moment, most things are configured for public access, and that's extremely insecure in a production environment.

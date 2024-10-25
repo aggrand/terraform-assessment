@@ -44,14 +44,11 @@ module "asg" {
 
   subnet_ids = data.aws_subnets.default.ids
 
-  user_data = base64encode(
-    <<-EOF
-    #!/bin/bash
-    echo "Running userdata script to start the web server"
-    echo "The server is up!" > index.html
-    nohup busybox httpd -f -p ${module.asg.instance_port} &
-    EOF
-  )
+  user_data = base64encode(templatefile("${path.module}/user-data.sh", {
+    server_port = module.asg.instance_port
+    db_address  = module.db.address
+    db_port     = module.db.port
+  }))
 
   target_group_arn = aws_lb_target_group.asg.arn
 
