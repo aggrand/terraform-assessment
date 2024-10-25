@@ -11,7 +11,6 @@ terraform {
 
 locals {
   tcp_protocol = "tcp"
-  all_ips      = ["0.0.0.0/0"]
 }
 
 resource "aws_db_instance" "module_db" {
@@ -24,9 +23,6 @@ resource "aws_db_instance" "module_db" {
   copy_tags_to_snapshot  = true
   db_name                = var.db_name
   vpc_security_group_ids = [aws_security_group.db.id]
-
-  # TODO: Remove this. It's insecure if we only need to access from the EC2 instances.
-  publicly_accessible = true
 
   username = var.db_username
   password = var.db_password
@@ -47,16 +43,16 @@ resource "aws_db_instance" "module_db" {
 
 resource "aws_security_group" "db" {
   name_prefix = "${var.cluster_name}-db-"
-  description = "Allow tcp inbound"
+  description = "Allow ec2 inbound"
 }
 
-resource "aws_security_group_rule" "allow_db_tcp_inbound" {
+resource "aws_security_group_rule" "allow_ec2_inbound" {
   type              = "ingress"
-  description       = "Allow tcp inbound"
+  description       = "Allow ec2 inbound"
   security_group_id = aws_security_group.db.id
 
-  from_port   = aws_db_instance.module_db.port
-  to_port     = aws_db_instance.module_db.port
-  protocol    = local.tcp_protocol
-  cidr_blocks = local.all_ips
+  from_port                = aws_db_instance.module_db.port
+  to_port                  = aws_db_instance.module_db.port
+  protocol                 = local.tcp_protocol
+  source_security_group_id = var.ec2_sg_id
 }

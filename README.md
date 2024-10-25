@@ -57,6 +57,9 @@ The s3 bucket and dynamo tables weren't explicit requirements of the email, but 
 ### modules/storage/dynamo
 This creates a DynamoDB table for terraform state locking. It is very purpose-built for that, only accepting a variable for setting the table's name. Future work could extend it to a general DynamoDB module.
 
+### modules/storage/mysql
+This uses RDS to create a database intended for use in an application. It accepts options for a db password and username.
+
 ### modules/compute/asg
 This module creates an autoscaling group for EC2 instances. It accepts various variables related to the min and max instance count, the AMI to use, a userdata script to run, and subnet_ids and target group ARNs that can be used to attach the module to others (like the load balancer). I think the instance refresh is still not working perfectly and health checks should be added; future work would tackle those.
 
@@ -70,3 +73,5 @@ This module has the golang tests. These tests are very simple; mostly just spinn
 I assumed for the moment that we'll only deploy to one region. The `live` configurations could be expanded to more regions, and a real app would probably want to do this, but the exact nature of that expansion would depend heavily on the app and how it functions, whether we'd want an "active-active" approach, how we'd deal with latency between regions, etc. In such a case we'd probably create separate modules under `live` for each region.
 
 One of the biggest flaws with the current setup is security and networking. Unfortunately I started running out of time for configuring the networking. Ideally we'd make a "vpc" module that would create a vpc in a region, as well as a set of public and private subnets in each AZ. Then we can hide most of our resources above into the private subnets, with security groups allowing access from only designated sources providing further protection. For the moment, most things are configured for public access, and that's extremely insecure in a production environment.
+
+Beyond that, I think developing each of the modules from the ground up, with a steady code-review process and thorough testing would make me a lot more confident in the infrastructure. We'd also want to make an effort to present a clean interface for each module, with an expectation that external users don't know the details. In this example they kind of grew organically.

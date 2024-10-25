@@ -25,3 +25,8 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "ec2_sg_id" {
+  description = "The security group id of EC2 instances that may want to access the DB"
+  type        = string
+}
