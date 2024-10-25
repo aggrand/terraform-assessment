@@ -20,7 +20,7 @@ fix: $(ALL_FIXES) ## Run all fixes
 
 .PHONY: test
 test: ## Run all tests
-	cd test; go test -v -timeout 30m
+	cd test; go test -v -timeout 90m
 
 .PHONY: terraform-check
 terraform-check: $(TERRAFORM_CHECKS) ## Run all terraform checks

@@ -88,3 +88,5 @@ I assumed for the moment that we'll only deploy to one region. The `live` config
 One of the biggest flaws with the current setup is security and networking. Unfortunately I started running out of time for configuring the networking. Ideally we'd make a "vpc" module that would create a vpc in a region, as well as a set of public and private subnets in each AZ. Then we can hide most of our resources above into the private subnets. 
 
 Beyond that, I think developing each of the modules from the ground up, with a steady code-review process and thorough testing would make me a lot more confident in the infrastructure. We'd also want to make an effort to present a clean interface for each module, with an expectation that external users don't know the details. In this example they kind of grew organically.
+
+Better observability and alerting would be needed all-around. As well as a CI/CD process.
