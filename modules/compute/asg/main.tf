@@ -71,7 +71,7 @@ resource "aws_security_group" "instance" {
 
 resource "aws_security_group_rule" "allow_server_http_inbound" {
   type              = "ingress"
-  description       = "Allow http inbound from the load balancer"
+  description       = "Allow http inbound from the load balancer and outbound to db"
   security_group_id = aws_security_group.instance.id
 
   from_port                = local.server_port
@@ -93,12 +93,12 @@ resource "aws_security_group_rule" "allow_ssh_inbound" {
 }
 
 # TODO: Restrict to just the db
-resource "aws_security_group_rule" "allow_all_outbound" {
+resource "aws_security_group_rule" "allow_outbound_to_db" {
   type              = "egress"
   security_group_id = aws_security_group.instance.id
 
-  from_port   = local.any_port
-  to_port     = local.any_port
-  protocol    = local.any_protocol
-  cidr_blocks = local.all_ips
+  from_port                = local.any_port
+  to_port                  = local.any_port
+  protocol                 = local.any_protocol
+  source_security_group_id = var.db_sg_id
 }

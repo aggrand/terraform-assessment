@@ -45,3 +45,8 @@ variable "lb_sg_id" {
   description = "The security group id of load balancer that routes traffic to the instance"
   type        = string
 }
+
+variable "db_sg_id" {
+  description = "ID of the security group of the database"
+  type        = string
+}

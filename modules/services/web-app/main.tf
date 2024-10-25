@@ -54,6 +54,7 @@ module "asg" {
 
   target_group_arn = aws_lb_target_group.asg.arn
   lb_sg_id         = module.alb.lb_sg_id
+  db_sg_id         = module.db.db_sg_id
 
   min_size = var.min_size
   max_size = var.max_size
