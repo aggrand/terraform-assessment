@@ -8,6 +8,10 @@ This repo uses pre-commit. It is recommended to install pre-commit using your pa
 pre-commit install
 ```
 
+You also need to install the following with the package manager of your choice: `terraform`, `checkov`, `go`, `golangci-lint`.
+
+You can ensure that most things are correctly set (and that your go packages are downloaded) up by running `make fix` followed by `make check`.
+
 ## Testing
 You can run `make` to see a list of testing options:
 

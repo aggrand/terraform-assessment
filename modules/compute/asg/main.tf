@@ -15,7 +15,8 @@ locals {
   server_port  = 8080
 }
 
-resource "aws_launch_template" "example" {
+resource "aws_launch_template" "module_template" {
+  name_prefix            = "${var.cluster_name}-"
   image_id               = var.instance_ami
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.instance.id]
@@ -27,11 +28,15 @@ resource "aws_launch_template" "example" {
   lifecycle {
     create_before_destroy = true
   }
+
+  #checkov:skip=CKV_AWS_79:Disabling metadata service would be future work
 }
 
-resource "aws_autoscaling_group" "example" {
+resource "aws_autoscaling_group" "module_asg" {
+  name_prefix = "${var.cluster_name}-"
+
   launch_template {
-    id = aws_launch_template.example.id
+    id = aws_launch_template.module_template.id
   }
   vpc_zone_identifier = var.subnet_ids
 
@@ -48,7 +53,6 @@ resource "aws_autoscaling_group" "example" {
     }
   }
 
-
   tag {
     key                 = "Name"
     value               = "${var.cluster_name}-asg"
@@ -57,11 +61,13 @@ resource "aws_autoscaling_group" "example" {
 }
 
 resource "aws_security_group" "instance" {
-  name = "${var.cluster_name}-instance"
+  name_prefix = "${var.cluster_name}-instance-"
+  description = "Allow http inbound"
 }
 
 resource "aws_security_group_rule" "allow_server_http_inbound" {
   type              = "ingress"
+  description       = "Allow http inbound"
   security_group_id = aws_security_group.instance.id
 
   from_port   = local.server_port
